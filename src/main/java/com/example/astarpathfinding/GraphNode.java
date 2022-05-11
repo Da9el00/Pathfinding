@@ -29,8 +29,8 @@ public class GraphNode implements Comparable<GraphNode> {
         return visited;
     }
 
-    public void setVisited() {
-        visited = true;
+    public void setVisited(boolean visited) {
+        this.visited = visited;
     }
 
     public double getH() {

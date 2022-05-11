@@ -23,7 +23,6 @@ public class HelloController implements Initializable {
 
     ArrayList<GraphNode> graphNodes = new ArrayList<>();
     ArrayList<GraphNode> path = new ArrayList<>();
-    Timeline traversalTimeline;
     double aStarPlaneWidth;
     double aStarPlaneHeight;
     int tilesAcross;
@@ -138,33 +137,41 @@ public class HelloController implements Initializable {
         bfs(start,goal);
 
         Iterator<GraphNode> nodeIterator = path.iterator();
+        nodeIterator.next();
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.2), ev -> {
             colorRectangle(nodeIterator.next().getRectangle(), Color.RED);
         }));
-        timeline.setCycleCount(path.size());
+        timeline.setCycleCount(path.size() - 1);
         timeline.playFromStart();
+
         timeline.setOnFinished(e -> findPathTraversal());
     }
 
     public void findPathTraversal(){
-        PriorityQueue<GraphNode> traversalPath = new PriorityQueue<>();
-        traversalPath.addAll(path);
-        ArrayList<GraphNode> nodesResult = new ArrayList<>();
-        int loops = traversalPath.size();
-        for (int i = 0; i < loops; i++) {
-            System.out.println(loops);
-            nodesResult.add(traversalPath.poll());
-        }
+        ArrayList<GraphNode> traversalPath = new ArrayList<>();
 
-        Iterator<GraphNode> nodeIterator = nodesResult.iterator();
-        traversalTimeline = new Timeline(new KeyFrame(Duration.seconds(0.2), ev -> {
-            GraphNode currentNode = nodeIterator.next();
-            if(currentNode.equals(start)){
-                traversalTimeline.stop();
+        path.forEach(node -> node.setVisited(false));
+
+        GraphNode currentNode = path.get(path.size() - 1);
+        traversalPath.add(currentNode);
+
+        while (currentNode != start){
+            ArrayList<GraphNode> neighbours = getNeighbours(currentNode, path);
+
+            currentNode = neighbours.get(0);
+
+            for (int i = 1; i < neighbours.size(); i++) {
+                if(neighbours.get(i).getH() > currentNode.getH()){
+                    currentNode = neighbours.get(i);
+                }
             }
-            colorRectangle(currentNode.getRectangle(), Color.BLUE);
+            traversalPath.add(currentNode);
+        }
+        Iterator<GraphNode> iterator = traversalPath.iterator();
+        Timeline traversalTimeline = new Timeline(new KeyFrame(Duration.seconds(0.2), ev -> {
+            colorRectangle(iterator.next().getRectangle(), Color.BLUE);
         }));
-        traversalTimeline.setCycleCount(-1);
+        traversalTimeline.setCycleCount(traversalPath.size() - 1);
         traversalTimeline.playFromStart();
     }
 
@@ -209,7 +216,8 @@ public class HelloController implements Initializable {
                 rectangleIndex++;
             }
         }
-    }public void findStart(){
+    }
+    public void findStart(){
         ObservableList<Node> rectangles = gamePlane.getChildren();
 
         int rectangleIndex = 0;
@@ -239,9 +247,8 @@ public class HelloController implements Initializable {
 
         while (!queue.isEmpty()){
             currentNode = queue.peek();
-            currentNode.setVisited();
+            currentNode.setVisited(true);
             path.add(currentNode);
-            //colorRectangle(currentNode.getRectangle());
             ArrayList<GraphNode> neighbours = getNeighbours(currentNode, graphNodes);
             for (GraphNode neighbour: neighbours) {
                 if(neighbour.getH() == 0){
@@ -272,12 +279,15 @@ public class HelloController implements Initializable {
 
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
-                    if(i == 0 && j == 0){
-                        break;
+                    /*if(i == 0 && j == 0){
+                        continue;
                     }
+
+                     */
+
                     if(graphNode.getI() == currentNode.getI()+i && graphNode.getJ() == currentNode.getJ()+j &&
                     graphNode.getH() != -1){
-                        graphNode.setVisited();
+                        graphNode.setVisited(true);
                         neighbours.add(graphNode);
                         //break outer;
                     }
