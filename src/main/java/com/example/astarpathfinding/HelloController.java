@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -20,7 +21,7 @@ public class HelloController implements Initializable {
     double aStarPlaneHeight;
     int tilesAcross;
     int tileAmount;
-    int gridSize = 50;
+    int gridSize = 25;
 
     Color backgroundColor1 = Color.WHITE;
     Color backgroundColor2 = Color.color(0.82,0.82,0.82);
@@ -31,11 +32,17 @@ public class HelloController implements Initializable {
     @FXML
     private ColorPicker colorPicker;
 
+    @FXML
+    private TextField gridSizeInput;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         aStarPlaneWidth = gamePlane.getPrefWidth();
         aStarPlaneHeight = gamePlane.getPrefHeight();
+        updateGrid();
+    }
 
+    private void updateGrid() {
         tilesAcross = (int) (aStarPlaneWidth / gridSize);
         tileAmount = (int) ((aStarPlaneWidth/gridSize) * (aStarPlaneHeight/gridSize));
 
@@ -62,8 +69,28 @@ public class HelloController implements Initializable {
         double mouseX = event.getX();
         double mouseY = event.getY();
 
-        int x = (int) ((mouseX/50) % tilesAcross) * 50;
-        int y = (int) ((mouseY/50) % (tileAmount/tilesAcross)) * 50;
+        int x = (int) ((mouseX/gridSize) % tilesAcross) * gridSize;
+        int y = (int) ((mouseY/gridSize) % (tileAmount/tilesAcross)) * gridSize;
+
+        ObservableList<Node> rectangles = gamePlane.getChildren();
+
+        for (Node node: rectangles) {
+            Rectangle rectangle = (Rectangle) node;
+            if(rectangle.getX() == x && rectangle.getY() == y){
+                rectangle.setFill(color);
+                return;
+            }
+        }
+    }
+
+    @FXML
+    void planeDragged(MouseEvent event) {
+        Color color = colorPicker.getValue();
+        double mouseX = event.getX();
+        double mouseY = event.getY();
+
+        int x = (int) ((mouseX/gridSize) % tilesAcross) * gridSize;
+        int y = (int) ((mouseY/gridSize) % (tileAmount/tilesAcross)) * gridSize;
 
         ObservableList<Node> rectangles = gamePlane.getChildren();
 
@@ -78,16 +105,9 @@ public class HelloController implements Initializable {
 
     @FXML
     void clearPlane(ActionEvent event) {
-        ObservableList<Node> rectangles = gamePlane.getChildren();
-
-        for (int i = 0; i < rectangles.size(); i++) {
-            Rectangle rectangle = (Rectangle) rectangles.get(i);
-            if((i % tilesAcross + i /tilesAcross) % 2 == 0){
-                rectangle.setFill(backgroundColor1);
-            } else {
-                rectangle.setFill(backgroundColor2);
-            }
-        }
+        gridSize = Integer.parseInt(gridSizeInput.getText());
+        gamePlane.getChildren().clear();
+        updateGrid();
     }
 
 

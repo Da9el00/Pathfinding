@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="AStarPathfinding" target="18" />
+      <module name="AStarPathfinding" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
