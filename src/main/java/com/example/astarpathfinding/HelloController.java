@@ -14,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -29,6 +30,7 @@ public class HelloController implements Initializable {
     int tilesDown;
     int tileAmount;
     int gridSize = 50;
+    double playbackSpeed = 0.1;
     GraphNode start;
     GraphNode goal;
 
@@ -53,7 +55,7 @@ public class HelloController implements Initializable {
 
         ObservableList<String> options =
                 FXCollections.observableArrayList(
-                        "Black",
+                        "Wall",
                         "Goal",
                         "Start",
                         "Blank"
@@ -63,7 +65,7 @@ public class HelloController implements Initializable {
 
     public Color getColor(String option){
         return switch (option) {
-            case "Black" -> Color.BLACK;
+            case "Wall" -> Color.BLACK;
             case "Goal" -> Color.YELLOW;
             case "Start" -> Color.GREEN;
             case "Blank" -> Color.WHITE;
@@ -130,15 +132,15 @@ public class HelloController implements Initializable {
 
     @FXML
     void runGBFS(ActionEvent event) {
-        findGoal();
-        findStart();
+        findGoalNode();
+        findStartNode();
         setupNodes();
         path.clear();
-        bfs(start,goal);
+        bfs(start);
 
         Iterator<GraphNode> nodeIterator = path.iterator();
         nodeIterator.next();
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.2), ev -> {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(playbackSpeed), ev -> {
             colorRectangle(nodeIterator.next().getRectangle(), Color.RED);
         }));
         timeline.setCycleCount(path.size() - 1);
@@ -168,7 +170,7 @@ public class HelloController implements Initializable {
             traversalPath.add(currentNode);
         }
         Iterator<GraphNode> iterator = traversalPath.iterator();
-        Timeline traversalTimeline = new Timeline(new KeyFrame(Duration.seconds(0.2), ev -> {
+        Timeline traversalTimeline = new Timeline(new KeyFrame(Duration.seconds(playbackSpeed), ev -> {
             colorRectangle(iterator.next().getRectangle(), Color.BLUE);
         }));
         traversalTimeline.setCycleCount(traversalPath.size() - 1);
@@ -199,7 +201,7 @@ public class HelloController implements Initializable {
         }
     }
 
-    public void findGoal(){
+    public void findGoalNode(){
         ObservableList<Node> rectangles = gamePlane.getChildren();
 
         int rectangleIndex = 0;
@@ -217,7 +219,7 @@ public class HelloController implements Initializable {
             }
         }
     }
-    public void findStart(){
+    public void findStartNode(){
         ObservableList<Node> rectangles = gamePlane.getChildren();
 
         int rectangleIndex = 0;
@@ -240,7 +242,7 @@ public class HelloController implements Initializable {
         return Math.sqrt(Math.pow(goal.getX() - rectangle.getX(), 2) + Math.pow(goal.getY() - rectangle.getY(), 2));
     }
 
-    public void bfs(GraphNode start, GraphNode target){
+    public void bfs(GraphNode start){
         GraphNode currentNode = start;
         PriorityQueue<GraphNode> queue = new PriorityQueue<GraphNode>();
         queue.add(currentNode);
@@ -268,32 +270,38 @@ public class HelloController implements Initializable {
     public ArrayList<GraphNode> getNeighbours(GraphNode currentNode, ArrayList<GraphNode> possibleGraphNodes){
         ArrayList<GraphNode> neighbours = new ArrayList<>();
 
-
         for (GraphNode graphNode: possibleGraphNodes) {
             if(graphNode.isVisited()){
                 continue;
             }
-            if(graphNode.equals(currentNode)){
-                continue;
-            }
-
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
-                    /*if(i == 0 && j == 0){
-                        continue;
-                    }
-
-                     */
-
                     if(graphNode.getI() == currentNode.getI()+i && graphNode.getJ() == currentNode.getJ()+j &&
                     graphNode.getH() != -1){
                         graphNode.setVisited(true);
                         neighbours.add(graphNode);
-                        //break outer;
                     }
                 }
             }
         }
         return neighbours;
     }
+
+    @FXML
+    void showHeuristic(ActionEvent event) {
+        findGoalNode();
+        findStartNode();
+        setupNodes();
+
+        for (GraphNode graphNode: graphNodes) {
+            Text text = new Text();
+            text.setText("h:"  + (int)graphNode.getH());
+            text.setX(graphNode.getX());
+            text.setY(graphNode.getY() + 15);
+
+            gamePlane.getChildren().add(text);
+        }
+
+    }
+
 }

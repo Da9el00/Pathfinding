@@ -2,8 +2,6 @@ package com.example.astarpathfinding;
 
 import javafx.scene.shape.Rectangle;
 
-import java.util.Comparator;
-
 public class GraphNode implements Comparable<GraphNode> {
 
     private Rectangle rectangle;

@@ -13,9 +13,10 @@
       <HBox prefHeight="50.0">
          <children>
             <Button mnemonicParsing="false" onAction="#clearPlane" text="Clear" />
-            <TextField fx:id="gridSizeInput" text="25" />
+            <TextField fx:id="gridSizeInput" text="50" />
             <ComboBox fx:id="colorPicker2" prefWidth="150.0" />
-            <Button mnemonicParsing="false" onAction="#runGBFS" text="GetGrid" />
+            <Button mnemonicParsing="false" onAction="#runGBFS" text="FindPath" />
+            <Button mnemonicParsing="false" onAction="#showHeuristic" text="Show H" />
          </children>
       </HBox>
    </children>
